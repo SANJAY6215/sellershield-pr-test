@@ -1,0 +1,18 @@
+===================================================================
+--- a/src/simulator/rules.ts	vulnerable
++++ b/src/simulator/rules.ts	secure
+@@ -1,9 +1,7 @@
+ function applyCoupons(subtotal: number, coupons: Coupon[]) {
+-  let running = subtotal;
+-  const applied: string[] = [];
+-  for (const c of coupons) {
+-    running = c.type === 'percent' ? running * (1 - c.value / 100) : running - c.value;
+-    applied.push(c.code);
+-  }
+-  return { total: Math.max(0, Math.round(running * 100) / 100), applied };
++  // Policy: at most ONE coupon per order. The first valid coupon wins; the rest are rejected.
++  const first = coupons[0];
++  if (!first) return { total: subtotal, applied: [] as string[] };
++  const running = first.type === 'percent' ? subtotal * (1 - first.value / 100) : subtotal - first.value;
++  return { total: Math.max(0, Math.round(running * 100) / 100), applied: [first.code] };
+ }
